@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BGMI Scoreboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0);
+            color: #FFD700;
+            margin: 0;
+            padding: 0;
+        }
+        h2 {
+            font-size: 28px;
+            text-shadow: 2px 2px 5px #FFD700;
+        }
+        table {
+            width: 80%;
+            margin: auto;
+            border-collapse: collapse;
+            background-color: rgba(34, 34, 34, 0.8);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0px 0px 10px #FFD700;
+        }
+        th, td {
+            border: 1px solid #FFD700;
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: rgba(51, 51, 51, 0.8);
+            color: #FFD700;
+        }
+        td {
+            background-color: rgba(17, 17, 17, 0.8);
+            color: white;
+        }
+        button {
+            padding: 8px 12px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            background-color: #FFD700;
+            color: black;
+            transition: 0.3s;
+        }
+        button:hover {
+            background-color: #FFC107;
+        }
+    </style>
+</head>
+<body>
+    <h2>BGMI Scoreboard</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Team Name</th>
+                <th>Kills</th>
+                <th>Placement Points</th>
+                <th>Total Points</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="scoreboard">
+            <!-- Teams will be added here dynamically -->
+        </tbody>
+    </table>
+    <br>
+    <button onclick="addTeam()">Add Team</button>
+    <button onclick="resetScores()">Reset Scores</button>
+    
+    <script>
+        let teams = JSON.parse(localStorage.getItem('teams')) || [];
+
+        function renderTable() {
+            const tbody = document.getElementById("scoreboard");
+            tbody.innerHTML = "";
+            teams.forEach((team, index) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td contenteditable="true" onblur="updateTeamName(${index}, this.innerText)">${team.name}</td>
+                        <td>${team.kills}</td>
+                        <td>${team.placement}</td>
+                        <td>${team.kills + team.placement}</td>
+                        <td>
+                            <button onclick="updateScore(${index}, 'kills', 1)">+ Kill</button>
+                            <button onclick="updateScore(${index}, 'kills', -1)">- Kill</button>
+                            <button onclick="updateScore(${index}, 'placement', 1)">+ Placement</button>
+                            <button onclick="updateScore(${index}, 'placement', -1)">- Placement</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            localStorage.setItem('teams', JSON.stringify(teams));
+        }
+
+        function addTeam() {
+            const teamName = prompt("Enter Team Name:") || "Team" + (teams.length + 1);
+            teams.push({ name: teamName, kills: 0, placement: 0 });
+            renderTable();
+        }
+
+        function updateScore(index, type, value) {
+            if (teams[index][type] + value >= 0) {
+                teams[index][type] += value;
+                renderTable();
+            }
+        }
+
+        function updateTeamName(index, newName) {
+            teams[index].name = newName;
+            localStorage.setItem('teams', JSON.stringify(teams));
+        }
+
+        function resetScores() {
+            if (confirm("Are you sure you want to reset scores?")) {
+                teams = [];
+                localStorage.removeItem('teams');
+                renderTable();
+            }
+        }
+
+        renderTable();
+    </script>
+</body>
+</html>
